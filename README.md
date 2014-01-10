@@ -1,14 +1,22 @@
 Spree Subscriptions
 ==================
 
-This extension allows for administrators to mark certain products as
-'susbscribable'. Products marked as such will allow shopers to decide to
-create a subscription to automatically have those items re-shipped to
-them at the interval of their chosing. 
+This extension allows administrators to mark certain products as
+'susbscribable'. Shoppers can subscribe to those products, causing them to be
+re-shipped to the shopper at a chosen interval.
 
 Features
 =======
 
+* Subscriptions are per-week. EG: every week, every 2 weeks, every 16 weeks. No daily or monthly subscriptions, sorry!
+* Subscriptions paid up-front, then delivered as many times as possible with the amount paid.
+* Entire orders (of subscribable products) can be subscribed, not just single products.
+* Subscription payments that fail are retried up to 5 times by default.
+
+Future Features
+===============
+
+* Subscriptions will be postpone-able until a set 'resume_on' date.
 
 Installation
 ========
@@ -19,10 +27,8 @@ Add the gem to your Gemfile:
     bundle install
 
 Run the generator and the included migrations:
-    
+
     rails g spree_subscriptions:install
-
-
 
 Testing
 -------

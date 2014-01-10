@@ -16,6 +16,10 @@ class GenerateSubscriptionOrder
     order.next!
   end
 
+  def transition_order_from_delivery_to_confirm!(order)
+    order.next!
+  end
+
   def transition_order_from_delivery_to_payment!(order)
     order.next!
   end
@@ -61,8 +65,11 @@ class GenerateSubscriptionOrder
 
       transition_order_from_cart_to_address!(next_order)
       transition_order_from_address_to_delivery!(next_order)
-      transition_order_from_delivery_to_payment!(next_order)
-
+      # See the proc at spree-33117371a5a5/core/app/models/spree/order.rb:25
+      # It makes prepaid orders advance directly from :delivery to :complete.
+      if next_order.payment_required?
+        transition_order_from_delivery_to_payment!(next_order)
+      end
 
       cc = find_or_create_credit_card(sub)
       ensure_profile_exists_for_payment_source(cc, previous_order)
@@ -76,8 +83,14 @@ class GenerateSubscriptionOrder
       }, without_protection: true)
 
       next_order.apply_employee_discount if previous_order.respond_to?(:has_employee_discount?) && previous_order.has_employee_discount?
-      transition_order_from_payment_to_confirm!(next_order)
-      transition_order_from_confirm_to_complete!(next_order, sub)
+      # See the proc at spree-33117371a5a5/core/app/models/spree/order.rb:25
+      # It causes prepaid orders to advance directly from :delivery to :confirm.
+      if next_order.payment_required?
+        transition_order_from_payment_to_confirm!(next_order)
+        transition_order_from_confirm_to_complete!(next_order, sub)
+      else
+        transition_order_from_delivery_to_confirm!(next_order)
+      end
       sub.decrement_prepaid_duration!
 
       puts "Order #{next_order.number} created for subscription ##{sub.id}."

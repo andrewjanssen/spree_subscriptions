@@ -27,7 +27,6 @@ describe GenerateSubscriptionOrder do
 
   context "prepaid" do
     it 'should reduce the remaining duration when processed' do
-      pending
       create_completed_prepaid_subscription_order
       subscription = @order.subscription
       Spree::Order.complete.count == 1
@@ -36,6 +35,20 @@ describe GenerateSubscriptionOrder do
       Spree::Order.complete.count == 2
       @order.subscription.duration.should == 5
     end
+
+    it 'should become a non-prepaid subscription on the last delivery' do
+      create_completed_prepaid_subscription_order
+      subscription = @order.subscription
+      @order.subscription.duration.should == 6
+      (1..6).to_a.each do |i|
+        GenerateSubscriptionOrder.new(subscription).call
+      end
+      @order.subscription.duration.should == 0
+      @order.subscription.prepaid?.should == false
+    end
+
+    # it 'should retry failed orders'
+    # it 'should retry failed orders no more than retry_count times'
   end
 
 end

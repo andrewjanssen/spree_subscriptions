@@ -88,7 +88,7 @@ module Spree
 
     def decrement_prepaid_duration!
       return unless prepaid?
-      update_column(:duration, duration-1)
+      update_column(:duration, duration - 1)
     end
   end
 end
